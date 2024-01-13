@@ -50,9 +50,7 @@
     <Compile Include="Entity\Company.cs" />
     <Compile Include="Entity\JobApplication.cs" />
     <Compile Include="Entity\JobListing.cs" />
-    <Compile Include="MyExceptions\ApplicationDeadlineException.cs" />
     <Compile Include="MyExceptions\DatabaseConnectionException.cs" />
-    <Compile Include="MyExceptions\FileUploadException.cs" />
     <Compile Include="MyExceptions\InvalidEmailFormatException.cs" />
     <Compile Include="MyExceptions\SalaryCalculationException.cs" />
     <Compile Include="MainModule.cs" />

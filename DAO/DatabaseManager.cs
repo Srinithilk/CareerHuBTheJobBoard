@@ -2,11 +2,15 @@
 using CareerHuBTheJobBoard.MyExceptions;
 using CareerHuBTheJobBoard.Util;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CareerHuBTheJobBoard.DAO
 {
@@ -20,7 +24,17 @@ namespace CareerHuBTheJobBoard.DAO
             {
                 using (conn = DbConnUtil.GetConnection())
                 {
-                    SqlCommand cmd = new SqlCommand($"insert into Jobs values ('{job.JobID}','{job.CompanyID}','{job.JobTitle}','{job.JobDescription}','{job.JobLocation}','{job.Salary}','{job.JobType}','{job.PostedDate}');", conn);
+                    string query = $"SELECT * FROM Jobs WHERE CompanyID={job.JobID}";
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Job already found.Please enter new Job Id");
+                    }
+                    dr.Close();
+                    cmd = new SqlCommand($"insert into Jobs values ('{job.JobID}','{job.CompanyID}','{job.JobTitle}','{job.JobDescription}','{job.JobLocation}','{job.Salary}','{job.JobType}','{job.PostedDate}');", conn);
                     conn.Open();
                     int rowsAffected = cmd.ExecuteNonQuery();
                     if (rowsAffected > 0)
@@ -47,7 +61,17 @@ namespace CareerHuBTheJobBoard.DAO
             {
                 using (conn = DbConnUtil.GetConnection())
                 {
-                    SqlCommand cmd = new SqlCommand($"insert into Companies values ('{company.CompanyID}','{company.CompanyName}','{company.Location}');", conn);
+                    string query = $"SELECT * FROM Companies WHERE CompanyID={company.CompanyID}";
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Company already found.Please enter new Company Id");
+                    }
+                    dr.Close();
+                    cmd = new SqlCommand($"insert into Companies values ('{company.CompanyID}','{company.CompanyName}','{company.Location}');", conn);
                     conn.Open();
                     int rowsAffected = cmd.ExecuteNonQuery();
                     if (rowsAffected > 0)
@@ -72,7 +96,17 @@ namespace CareerHuBTheJobBoard.DAO
             {
                 using (conn = DbConnUtil.GetConnection())
                 {
-                    SqlCommand cmd = new SqlCommand($"insert into Applicants values ('{applicant.ApplicantID}','{applicant.FirstName}','{applicant.LastName}','{applicant.Email}','{applicant.Phone}','{applicant.Resume}');", conn);
+                    string query = $"SELECT * FROM Applicants WHERE ApplicantID={applicant.ApplicantID}";
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Applicant already found.Please enter new Applicant Id");
+                    }
+                    dr.Close();
+                    cmd = new SqlCommand($"insert into Applicants values ('{applicant.ApplicantID}','{applicant.FirstName}','{applicant.LastName}','{applicant.Email}','{applicant.Phone}','{applicant.Resume}');", conn);
                     conn.Open();
                     int rowsAffected = cmd.ExecuteNonQuery();
                     if (rowsAffected > 0)
@@ -97,11 +131,20 @@ namespace CareerHuBTheJobBoard.DAO
             {
                 using (conn = DbConnUtil.GetConnection())
                 {
-                    SqlCommand cmd = new SqlCommand($"insert into Applications values ('{application.ApplicationID}','{application.JobID}','{application.ApplicantID}','{application.ApplicationDate}','{application.CoverLetter}');", conn);
+                    string query = $"SELECT * FROM Applications WHERE ApplicationID={application.ApplicationID}";
                     conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Application already found.Please enter new Application Id");
+                    }
+                    dr.Close();
+                    cmd = new SqlCommand($"insert into Applications values ('{application.ApplicationID}','{application.JobID}','{application.ApplicantID}','{application.ApplicationDate}','{application.CoverLetter}');", conn);
                     int rowsAffected = cmd.ExecuteNonQuery();
                     if (rowsAffected > 0)
-                        Console.WriteLine("Applicantion added successfully!");
+                        Console.WriteLine("Application added successfully!");
                     else
                         Console.WriteLine("Failed to add the Applicantion!");
                 }
@@ -109,7 +152,7 @@ namespace CareerHuBTheJobBoard.DAO
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+               Console.WriteLine(ex.Message);
             }
             finally
             {
@@ -143,6 +186,58 @@ namespace CareerHuBTheJobBoard.DAO
             }
         }
 
+        public List<JobListing> GetJobsPosted(Company company)
+        {
+            try
+            {
+                List<JobListing> job = new List<JobListing>();
+                conn = DbConnUtil.GetConnection();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandType = System.Data.CommandType.Text;
+                cmd.CommandText = $"Select * from Jobs where CompanyID={company.CompanyID}";
+                conn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+                while (dr.Read())
+                {
+                    job.Add(new JobListing() { JobID = (int)dr[0], CompanyID = (int)dr[1], JobTitle = dr[2].ToString(), JobDescription = dr[3].ToString(), JobLocation = dr[4].ToString(), Salary = (decimal)dr[5], JobType = dr[6].ToString(), PostedDate = (DateTime)dr[7] });
+                }
+                dr.Close();
+                conn.Close();
+                return job;
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseConnectionException("Error retrieving job listings: " + ex.Message);
+            }
+        }
+        public List<JobListing> GetAlltheJobsInRange(decimal min,decimal max)
+        {
+            try
+            {
+                List<JobListing> job = new List<JobListing>();
+                conn = DbConnUtil.GetConnection();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandType = System.Data.CommandType.Text;
+                cmd.CommandText = $"Select * from Jobs where Salary between {min} and {max}";
+                conn.Open();
+                SqlDataReader dr = cmd.ExecuteReader();
+                while (dr.Read())
+                {
+                    job.Add(new JobListing() { JobID = (int)dr[0], CompanyID = (int)dr[1], JobTitle = dr[2].ToString(), JobDescription = dr[3].ToString(), JobLocation = dr[4].ToString(), Salary = (decimal)dr[5], JobType = dr[6].ToString(), PostedDate = (DateTime)dr[7] });
+                }
+                dr.Close();
+                conn.Close();
+                return job;
+            }
+            catch (Exception ex)
+            {
+                throw new SalaryCalculationException("Error retrieving Salary: " + ex.Message);
+            }
+
+        }
+
         public List<Company> GetCompanies()
         {
             List<Company> company = new List<Company>();
@@ -169,7 +264,7 @@ namespace CareerHuBTheJobBoard.DAO
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = conn;
             cmd.CommandType = System.Data.CommandType.Text;
-            cmd.CommandText = "Select * from Applicants";
+            cmd.CommandText = "Select * from Applicants ";
             conn.Open();
             SqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
@@ -181,14 +276,14 @@ namespace CareerHuBTheJobBoard.DAO
             return applicant;
         }
 
-        public List<JobApplication> GetApplicationsForJob()
+        public List<JobApplication> GetApplicationsForJob(int jobID )
         {
             List<JobApplication> jobApplications = new List<JobApplication>();
             conn = DbConnUtil.GetConnection();
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = conn;
             cmd.CommandType = System.Data.CommandType.Text;
-            cmd.CommandText = $"Select * from Applications";
+            cmd.CommandText = $"Select * from Applications where jobID = {jobID}";
             conn.Open();
             SqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
@@ -198,6 +293,32 @@ namespace CareerHuBTheJobBoard.DAO
             dr.Close();
             conn.Close();
             return jobApplications;
+        }
+
+        public void CreateProfile(int applicantID, string firstName, string lastName, string email, string phone,string resume)
+        {
+            try
+            {
+                using (conn = DbConnUtil.GetConnection())
+                {
+                    SqlCommand cmd = new SqlCommand($"insert into Applicants values ('{applicantID}','{firstName}','{lastName}','{email}','{phone}','{resume}');", conn);
+                    conn.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                        Console.WriteLine("Applicant Profile Created Successfully");
+                    else
+                        Console.WriteLine("Failed to Create Profile!");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
     }
 }
