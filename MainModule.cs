@@ -20,7 +20,6 @@ namespace CareerHuBTheJobBoard
                 Console.WriteLine("========================");
                 Console.WriteLine("CAREER HUB THE JOB BOARD");
                 Console.WriteLine("========================");
-                Console.WriteLine();
                 Console.WriteLine("Menu:");
                 Console.WriteLine("-----------");
                 Console.WriteLine("JobListings");
@@ -28,7 +27,7 @@ namespace CareerHuBTheJobBoard
                 Console.WriteLine("1. Insert JobListing");
                 Console.WriteLine("2. Getall JobListing");
                 Console.WriteLine("3. Get Jobs Posted By Company");
-                Console.WriteLine("4. List All Jobs In Range");
+                Console.WriteLine("4. List All Jobs In Salary Range");
                 Console.WriteLine("-------");
                 Console.WriteLine("Company");
                 Console.WriteLine("-------");
@@ -89,7 +88,7 @@ namespace CareerHuBTheJobBoard
                             List<JobListing> joblist = databaseManager.GetJobListings();
                             foreach (JobListing j in joblist)
                             {
-                                Console.WriteLine($"{j.JobID}\t {j.CompanyID}\t {j.JobTitle}\t {j.JobDescription}\t {j.JobLocation}\t {j.Salary}\t {j.JobType}\t {j.PostedDate}");
+                                Console.WriteLine($"{j.JobID}\n {j.CompanyID}\n {j.JobTitle}\n {j.JobDescription}\n {j.JobLocation}\n {j.Salary}\n {j.JobType}\n {j.PostedDate}");
                             }
                         }
                         catch (Exception e)
@@ -204,7 +203,7 @@ namespace CareerHuBTheJobBoard
                             List<Applicant> jobapp = databaseManager.GetApplicants();
                             foreach (Applicant ja in jobapp)
                             {
-                                Console.WriteLine($"{ja.ApplicantID}\t {ja.FirstName}\t {ja.LastName}\t {ja.Email}\t {ja.Phone}\t {ja.Resume}");
+                                Console.WriteLine($"{ja.ApplicantID}\n {ja.FirstName}\n {ja.LastName}\n {ja.Email}\n {ja.Phone}\n {ja.Resume}");
                             }
                         }
                         catch (Exception e)

@@ -24,7 +24,7 @@ namespace CareerHuBTheJobBoard.DAO
             {
                 using (conn = DbConnUtil.GetConnection())
                 {
-                    string query = $"SELECT * FROM Jobs WHERE CompanyID={job.JobID}";
+                    string query = $"SELECT * FROM Jobs WHERE JobID={job.JobID}";
                     conn.Open();
                     SqlCommand cmd = new SqlCommand(query, conn);
                     SqlDataReader dr = cmd.ExecuteReader();
@@ -35,7 +35,6 @@ namespace CareerHuBTheJobBoard.DAO
                     }
                     dr.Close();
                     cmd = new SqlCommand($"insert into Jobs values ('{job.JobID}','{job.CompanyID}','{job.JobTitle}','{job.JobDescription}','{job.JobLocation}','{job.Salary}','{job.JobType}','{job.PostedDate}');", conn);
-                    conn.Open();
                     int rowsAffected = cmd.ExecuteNonQuery();
                     if (rowsAffected > 0)
                         Console.WriteLine("Job added successfully!");
@@ -46,113 +45,7 @@ namespace CareerHuBTheJobBoard.DAO
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
-        }
-
-        public void InsertCompany(Company company)
-        {
-
-            try
-            {
-                using (conn = DbConnUtil.GetConnection())
-                {
-                    string query = $"SELECT * FROM Companies WHERE CompanyID={company.CompanyID}";
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    if (dr.Read())
-                    {
-                        Console.WriteLine("Company already found.Please enter new Company Id");
-                    }
-                    dr.Close();
-                    cmd = new SqlCommand($"insert into Companies values ('{company.CompanyID}','{company.CompanyName}','{company.Location}');", conn);
-                    conn.Open();
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                        Console.WriteLine("Company added successfully!");
-                    else
-                        Console.WriteLine("Failed to add the Company!");
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
-        }
-        public void InsertApplicant(Applicant applicant)
-        {
-            try
-            {
-                using (conn = DbConnUtil.GetConnection())
-                {
-                    string query = $"SELECT * FROM Applicants WHERE ApplicantID={applicant.ApplicantID}";
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    if (dr.Read())
-                    {
-                        Console.WriteLine("Applicant already found.Please enter new Applicant Id");
-                    }
-                    dr.Close();
-                    cmd = new SqlCommand($"insert into Applicants values ('{applicant.ApplicantID}','{applicant.FirstName}','{applicant.LastName}','{applicant.Email}','{applicant.Phone}','{applicant.Resume}');", conn);
-                    conn.Open();
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                        Console.WriteLine("Applicant added successfully!");
-                    else
-                        Console.WriteLine("Failed to add the Applicant!");
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
-        }
-        public void InsertJobApplication(JobApplication application)
-        {
-            try
-            {
-                using (conn = DbConnUtil.GetConnection())
-                {
-                    string query = $"SELECT * FROM Applications WHERE ApplicationID={application.ApplicationID}";
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(query, conn);
-                    SqlDataReader dr = cmd.ExecuteReader();
-
-                    if (dr.Read())
-                    {
-                        Console.WriteLine("Application already found.Please enter new Application Id");
-                    }
-                    dr.Close();
-                    cmd = new SqlCommand($"insert into Applications values ('{application.ApplicationID}','{application.JobID}','{application.ApplicantID}','{application.ApplicationDate}','{application.CoverLetter}');", conn);
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                        Console.WriteLine("Application added successfully!");
-                    else
-                        Console.WriteLine("Failed to add the Applicantion!");
-                }
-
-            }
-            catch (Exception ex)
-            {
-               Console.WriteLine(ex.Message);
+                //Console.WriteLine(ex.Message);
             }
             finally
             {
@@ -211,6 +104,7 @@ namespace CareerHuBTheJobBoard.DAO
                 throw new DatabaseConnectionException("Error retrieving job listings: " + ex.Message);
             }
         }
+
         public List<JobListing> GetAlltheJobsInRange(decimal min,decimal max)
         {
             try
@@ -233,13 +127,51 @@ namespace CareerHuBTheJobBoard.DAO
             }
             catch (Exception ex)
             {
-                throw new SalaryCalculationException("Error retrieving Salary: " + ex.Message);
+                throw new SalaryCalculationException("Error retrieving Salary Range: " + ex.Message);
             }
 
         }
 
+        public void InsertCompany(Company company)
+        {
+
+            try
+            {
+                using (conn = DbConnUtil.GetConnection())
+                {
+                    string query = $"SELECT * FROM Companies WHERE CompanyID={company.CompanyID}";
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Company already found.Please enter new Company Id");
+                    }
+                    dr.Close();
+                    cmd = new SqlCommand($"insert into Companies values ('{company.CompanyID}','{company.CompanyName}','{company.Location}');", conn);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                        Console.WriteLine("Company added successfully!");
+                    else
+                        Console.WriteLine("Failed to add the Company!");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
         public List<Company> GetCompanies()
         {
+            try 
+            { 
             List<Company> company = new List<Company>();
             conn = DbConnUtil.GetConnection();
             SqlCommand cmd = new SqlCommand();
@@ -255,16 +187,66 @@ namespace CareerHuBTheJobBoard.DAO
             dr.Close();
             conn.Close();
             return company;
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseConnectionException("Error retrieving Companies: " + ex.Message);
+            }
+        }
+
+        public void InsertApplicant(Applicant applicant)
+        {
+            try
+            {
+                using (conn = DbConnUtil.GetConnection())
+                {
+                    string query = $"SELECT * FROM Applicants WHERE ApplicantID={applicant.ApplicantID}";
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Applicant already found.Please enter new Applicant Id");
+                    }
+                    dr.Close();
+                    if (!applicant.Email.Contains("@"))
+                    {
+                        throw new InvalidEmailFormatException("Invalid Email Format.Enter Again Your Email Correctly");
+                    }
+                    cmd = new SqlCommand($"insert into Applicants values ('{applicant.ApplicantID}','{applicant.FirstName}','{applicant.LastName}','{applicant.Email}','{applicant.Phone}','{applicant.Resume}');", conn);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                        Console.WriteLine("Applicant added successfully!");
+                    else
+                        Console.WriteLine("Failed to add the Applicant!");
+                }
+
+            }
+            catch (InvalidEmailFormatException ex)
+            {
+                Console.WriteLine($"\n{ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
 
         public List<Applicant> GetApplicants()
         {
+            try
+            { 
             List<Applicant> applicant = new List<Applicant>();
             conn = DbConnUtil.GetConnection();
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = conn;
             cmd.CommandType = System.Data.CommandType.Text;
-            cmd.CommandText = "Select * from Applicants ";
+            cmd.CommandText = "Select * from Applicants";
             conn.Open();
             SqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
@@ -274,10 +256,51 @@ namespace CareerHuBTheJobBoard.DAO
             dr.Close();
             conn.Close();
             return applicant;
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseConnectionException("Error retrieving Applicants: " + ex.Message);
+            }
+        }
+        public void InsertJobApplication(JobApplication application)
+        {
+            try
+            {
+                using (conn = DbConnUtil.GetConnection())
+                {
+                    string query = $"SELECT * FROM Applications WHERE ApplicationID={application.ApplicationID}";
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        Console.WriteLine("Application already found.Please enter new Application Id");
+                    }
+                    dr.Close();
+                    cmd = new SqlCommand($"insert into Applications values ('{application.ApplicationID}','{application.JobID}','{application.ApplicantID}','{application.ApplicationDate}','{application.CoverLetter}');", conn);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                        Console.WriteLine("Application added successfully!");
+                    else
+                        Console.WriteLine("Failed to add the Applicantion!");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
 
         public List<JobApplication> GetApplicationsForJob(int jobID )
         {
+            try
+            {
             List<JobApplication> jobApplications = new List<JobApplication>();
             conn = DbConnUtil.GetConnection();
             SqlCommand cmd = new SqlCommand();
@@ -293,6 +316,11 @@ namespace CareerHuBTheJobBoard.DAO
             dr.Close();
             conn.Close();
             return jobApplications;
+            }
+            catch (Exception ex)
+            {
+                throw new DatabaseConnectionException("Error retrieving job Applications: " + ex.Message);
+            }
         }
 
         public void CreateProfile(int applicantID, string firstName, string lastName, string email, string phone,string resume)
